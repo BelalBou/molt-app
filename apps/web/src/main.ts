@@ -1,6 +1,7 @@
 import './style.css'
 
-const API_BASE = 'http://localhost:8080'
+const host = window.location.hostname
+const API_BASE = window.location.protocol + '//' + host + ':3000'
 
 const app = document.querySelector<HTMLDivElement>('#app')!
 app.innerHTML = [
