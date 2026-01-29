@@ -1,0 +1,38 @@
+# Logs
+logs
+*.log
+
+# OS
+.DS_Store
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Env
+.env
+.env.*
+
+# Prisma
+prisma/.env
+
+# Vite
+apps/web/dist/
+apps/web/.vite/
+
+# NestJS
+apps/api/dist/
+
+# Editor
+.vscode/
+.idea/
+
+# Coverage
+coverage/
+
+# Cache
+.tmp/
+.cache/
+
+# Misc
+*.tsbuildinfo
