@@ -1,17 +1,93 @@
-// Prisma schema
-
 generator client {
-  provider = "prisma-client-js"
+  provider = prisma-client-js
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = postgresql
+  url      = env(DATABASE_URL)
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
+enum LogFileType {
+  ADM
+  RPT
+}
+
+enum AuditLevel {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+}
+
+model Server {
+  id          String        @id @default(cuid())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  serviceId   String
+  guildId     String
+  mission     String?
+  platform    String?
+  ftpUsername String?
+
+  cursors     IngestCursor[]
+  events      LogEvent[]
+  discord     DiscordConfig?
+
+  @@unique([serviceId, guildId])
+}
+
+model IngestCursor {
+  id        String      @id @default(cuid())
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  serverId  String
+  server    Server      @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  fileType  LogFileType
+  lastFile  String?
+  lastOffset Int?
+
+  @@unique([serverId, fileType])
+}
+
+model LogEvent {
+  id        String   @id @default(cuid())
   createdAt DateTime @default(now())
+
+  serverId  String
+  server    Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  type      String
+  ts        DateTime
+  payload   Json
+  hash      String   @unique
+
+  @@index([serverId, type, ts])
+}
+
+model DiscordConfig {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  guildId   String
+  serverId  String  @unique
+  server    Server  @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  channelIds Json
+  isActive  Boolean @default(true)
+
+  @@index([guildId])
+}
+
+model AuditLog {
+  id        String     @id @default(cuid())
+  createdAt DateTime   @default(now())
+
+  scope     String
+  level     AuditLevel @default(INFO)
+  message   String
+  meta      Json?
 }
