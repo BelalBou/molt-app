@@ -1,24 +1,39 @@
 import './style.css'
-import typescriptLogo from './typescript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.ts'
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
-    <h1>Vite + TypeScript</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
-  </div>
-`
+const API_BASE = 'http://localhost:8080'
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+const app = document.querySelector<HTMLDivElement>('#app')!
+app.innerHTML = [
+  '<div class=page>',
+  '  <header>',
+  '    <h1>Molt — Panel</h1>',
+  '    <p class=muted>Live status + changelog</p>',
+  '  </header>',
+  '  <section class=card>',
+  '    <h2>Status</h2>',
+  '    <div id=status class=status>Loading...</div>',
+  '  </section>',
+  '  <section class=card>',
+  '    <h2>Changelog</h2>',
+  '    <pre id=changelog>Loading...</pre>',
+  '  </section>',
+  '</div>',
+].join('\n')
+
+const statusEl = document.querySelector<HTMLDivElement>('#status')!
+const changelogEl = document.querySelector<HTMLPreElement>('#changelog')!
+
+async function refresh() {
+  try {
+    const res = await fetch(API_BASE + '/status')
+    const data = await res.json()
+    statusEl.textContent = 'Last update: ' + data.updatedAt
+    changelogEl.textContent = data.content
+  } catch (e) {
+    statusEl.textContent = 'Status unavailable'
+    changelogEl.textContent = 'Changelog unavailable'
+  }
+}
+
+refresh()
+setInterval(refresh, 5000)
